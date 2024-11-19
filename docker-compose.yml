@@ -1,3 +1,9 @@
+# docker-compose.yml
+# Version: 1.0.0
+# Last Updated: 2024-11-19
+# Organization: Work Lenz
+# Description: Base docker-compose configuration for Work Lenz application
+
 services:
   frontend:
     image: ghcr.io/worklenz/worklenz-frontend
@@ -11,7 +17,7 @@ services:
       backend:
         condition: service_started
     networks:
-      - coolify    
+      - worklenz-network    
 
   backend:
     image: ghcr.io/worklenz/worklenz-backend
@@ -57,7 +63,7 @@ services:
       - S3_ACCESS_KEY_ID
       - S3_SECRET_ACCESS_KEY
     networks:
-      - coolify  
+      - worklenz-network  
 
   db:
     image: postgres:15
@@ -71,10 +77,15 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - coolify  
+      - worklenz-network  
     volumes:
       - worklenz_postgres_data:/var/lib/postgresql/data
       - ./worklenz-backend/database/:/docker-entrypoint-initdb.d
 
 volumes:
   worklenz_postgres_data:
+
+networks:
+  worklenz-network:
+    name: worklenz-network
+    driver: bridge
