@@ -1,9 +1,3 @@
-# docker-compose.yml
-# Version: 1.0.0
-# Last Updated: 2024-11-19
-# Organization: Work Lenz
-# Description: Base docker-compose configuration for Work Lenz application
-
 services:
   frontend:
     image: ghcr.io/worklenz/worklenz-frontend
@@ -18,6 +12,10 @@ services:
         condition: service_started
     networks:
       - worklenz-network    
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 
   backend:
     image: ghcr.io/worklenz/worklenz-backend
@@ -62,8 +60,13 @@ services:
       - S3_URL
       - S3_ACCESS_KEY_ID
       - S3_SECRET_ACCESS_KEY
+      - NODE_OPTIONS=--max-old-space-size=4096
     networks:
       - worklenz-network  
+    deploy:
+      resources:
+        limits:
+          memory: 4G
 
   db:
     image: postgres:15
