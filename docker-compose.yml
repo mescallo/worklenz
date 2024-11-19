@@ -5,7 +5,7 @@ services:
      context: ./worklenz-frontend
      dockerfile: Dockerfile
      args:
-       - NODE_OPTIONS=--max-old-space-size=2048
+       - NODE_OPTIONS=--max-old-space-size=1024
    container_name: worklenz_frontend
    ports:
      - "4200:4200"
@@ -17,9 +17,10 @@ services:
    deploy:
      resources:
        limits:
-         memory: 2G
-       reservations:
          memory: 1G
+         cpus: '1'
+       reservations:
+         memory: 512M
 
  backend:
    image: ghcr.io/worklenz/worklenz-backend
@@ -27,7 +28,7 @@ services:
      context: ./worklenz-backend
      dockerfile: Dockerfile
      args:
-       - NODE_OPTIONS=--max-old-space-size=6144
+       - NODE_OPTIONS=--max-old-space-size=4096
    container_name: worklenz_backend
    ports:
      - "3000:3000"
@@ -43,7 +44,7 @@ services:
      - COMMIT_BUILD_IMMEDIATELY
      - COOKIE_SECRET
      - DB_HOST
-     - DB_MAX_CLIENTS
+     - DB_MAX_CLIENTS=10
      - DB_NAME
      - DB_PASSWORD
      - DB_PORT
@@ -53,7 +54,7 @@ services:
      - GOOGLE_CLIENT_SECRET
      - HOSTNAME
      - LOGIN_FAILURE_REDIRECT
-     - NODE_ENV
+     - NODE_ENV=production
      - PORT
      - SESSION_NAME
      - SESSION_SECRET
@@ -66,15 +67,16 @@ services:
      - S3_URL
      - S3_ACCESS_KEY_ID
      - S3_SECRET_ACCESS_KEY
-     - NODE_OPTIONS=--max-old-space-size=6144
+     - NODE_OPTIONS=--max-old-space-size=4096
    networks:
      - worklenz-network  
    deploy:
      resources:
        limits:
-         memory: 6G
+         memory: 4G
+         cpus: '2'
        reservations:
-         memory: 3G
+         memory: 2G
 
  db:
    image: postgres:15
@@ -82,6 +84,8 @@ services:
    environment:
      POSTGRES_DB: "${DB_NAME}"
      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+     POSTGRES_MAX_CONNECTIONS: 100
+     POSTGRES_SHARED_BUFFERS: 1GB
    healthcheck:
      test: ["CMD-SHELL", "pg_isready -d ${DB_NAME} -U ${DB_USER}"]
      interval: 10s
@@ -92,9 +96,17 @@ services:
    volumes:
      - worklenz_postgres_data:/var/lib/postgresql/data
      - ./worklenz-backend/database/:/docker-entrypoint-initdb.d
+   deploy:
+     resources:
+       limits:
+         memory: 2G
+         cpus: '1'
+       reservations:
+         memory: 1G
 
 volumes:
  worklenz_postgres_data:
+   driver: local
 
 networks:
  worklenz-network:
