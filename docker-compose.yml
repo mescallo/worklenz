@@ -11,7 +11,7 @@ services:
       backend:
         condition: service_started
     networks:
-      - worklenz    
+      - coolify    
 
   backend:
     image: ghcr.io/worklenz/worklenz-backend
