@@ -22,6 +22,8 @@ services:
     build:
       context: ./worklenz-backend
       dockerfile: Dockerfile
+      args:
+        - NODE_OPTIONS=--max-old-space-size=6144
     container_name: worklenz_backend
     ports:
       - "3000:3000"
@@ -60,13 +62,13 @@ services:
       - S3_URL
       - S3_ACCESS_KEY_ID
       - S3_SECRET_ACCESS_KEY
-      - NODE_OPTIONS=--max-old-space-size=4096
+      - NODE_OPTIONS=--max-old-space-size=6144
     networks:
       - worklenz-network  
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 6G
 
   db:
     image: postgres:15
